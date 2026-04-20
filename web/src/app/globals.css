@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Design System UbaJob */
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Primary — Azul-petróleo */
+  --color-primary: #006D77;
+  --color-primary-50: #e0f2f4;
+  --color-primary-100: #b3e0e4;
+  --color-primary-200: #80ccd4;
+  --color-primary-300: #4db8c4;
+  --color-primary-400: #26a8b6;
+  --color-primary-500: #006D77;
+  --color-primary-600: #005f68;
+  --color-primary-700: #004f57;
+  --color-primary-800: #003f46;
+  --color-primary-900: #002f34;
+
+  /* Accent — Verde-água */
+  --color-accent: #83C5BE;
+  --color-accent-50: #f0faf9;
+  --color-accent-100: #d4f0ed;
+  --color-accent-200: #a9e1db;
+  --color-accent-300: #83C5BE;
+  --color-accent-400: #5aada5;
+  --color-accent-500: #3d948c;
+
+  /* Sand — Areia */
+  --color-sand: #F2E9D8;
+  --color-sand-50: #fdf9f3;
+  --color-sand-100: #F2E9D8;
+  --color-sand-200: #e8d9c0;
+  --color-sand-300: #d4be9a;
+
+  /* Dark mode surfaces */
+  --color-dark-bg: #0f1923;
+  --color-dark-surface: #1a2535;
+  --color-dark-border: #2a3a4d;
+
+  /* Border radius */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 20px rgba(0,0,0,0.08);
+  --shadow-card: 0 4px 30px rgba(0,0,0,0.10);
+  --shadow-glow: 0 0 20px rgba(0,109,119,0.30);
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+}
+
+body {
+  background-color: var(--color-sand-50);
+  color: var(--color-dark-bg);
+}
+
+.dark body {
+  background-color: var(--color-dark-bg);
+  color: var(--color-sand-100);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-accent); border-radius: 3px; }
