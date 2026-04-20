@@ -73,28 +73,24 @@ export const useAppStore = create<AppState>()(
 
       loginWithApi: async (email, password) => {
         const res = await api.auth.login({ email, password });
-        const me = await api.users.me();
         const user: User = {
-          id: me.id,
-          name: me.name,
-          email: me.email,
-          role: me.role as "candidate" | "employer",
-          avatar: me.avatar ?? undefined,
-          createdAt: me.createdAt,
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role as "candidate" | "employer",
+          createdAt: new Date().toISOString(),
         };
         set({ currentUser: user, isAuthenticated: true, token: res.access_token });
       },
 
       registerWithApi: async (name, email, password, role) => {
         const res = await api.auth.register({ name, email, password, role });
-        const me = await api.users.me();
         const user: User = {
-          id: me.id,
-          name: me.name,
-          email: me.email,
-          role: me.role as "candidate" | "employer",
-          avatar: me.avatar ?? undefined,
-          createdAt: me.createdAt,
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role as "candidate" | "employer",
+          createdAt: new Date().toISOString(),
         };
         set({ currentUser: user, isAuthenticated: true, token: res.access_token });
       },

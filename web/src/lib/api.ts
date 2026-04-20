@@ -34,12 +34,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 export const api = {
   auth: {
     register: (data: { name: string; email: string; password: string; role: string }) =>
-      request<{ access_token: string; user: { id: string; email: string; role: string } }>('/auth/register', {
+      request<{ access_token: string; user: { id: string; name: string; email: string; role: string } }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     login: (data: { email: string; password: string }) =>
-      request<{ access_token: string; user: { id: string; email: string; role: string } }>('/auth/login', {
+      request<{ access_token: string; user: { id: string; name: string; email: string; role: string } }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
