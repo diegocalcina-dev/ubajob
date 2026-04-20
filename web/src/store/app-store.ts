@@ -9,12 +9,16 @@ import {
   mockUsers, mockJobs, mockApplications, mockConversations,
   mockNotifications, mockCandidateProfiles, mockEmployerProfiles,
 } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 
 interface AppState {
   // Auth
   currentUser: User | null;
   isAuthenticated: boolean;
+  token: string | null;
   login: (email: string, role: "candidate" | "employer") => void;
+  loginWithApi: (email: string, password: string) => Promise<void>;
+  registerWithApi: (name: string, email: string, password: string, role: string) => Promise<void>;
   logout: () => void;
 
   // Jobs
@@ -25,6 +29,7 @@ interface AppState {
   // Applications
   applications: Application[];
   applyToJob: (jobId: string, coverLetter?: string) => void;
+  applyToJobApi: (jobId: string, coverLetter?: string) => Promise<void>;
 
   // Conversations
   conversations: Conversation[];
@@ -52,6 +57,8 @@ export const useAppStore = create<AppState>()(
       // Auth
       currentUser: null,
       isAuthenticated: false,
+      token: null,
+
       login: (email, role) => {
         const user = mockUsers.find((u) => u.role === role) ?? {
           id: "demo-" + role,
@@ -61,9 +68,38 @@ export const useAppStore = create<AppState>()(
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
           createdAt: new Date().toISOString(),
         };
-        set({ currentUser: user, isAuthenticated: true });
+        set({ currentUser: user, isAuthenticated: true, token: null });
       },
-      logout: () => set({ currentUser: null, isAuthenticated: false }),
+
+      loginWithApi: async (email, password) => {
+        const res = await api.auth.login({ email, password });
+        const me = await api.users.me();
+        const user: User = {
+          id: me.id,
+          name: me.name,
+          email: me.email,
+          role: me.role as "candidate" | "employer",
+          avatar: me.avatar ?? undefined,
+          createdAt: me.createdAt,
+        };
+        set({ currentUser: user, isAuthenticated: true, token: res.access_token });
+      },
+
+      registerWithApi: async (name, email, password, role) => {
+        const res = await api.auth.register({ name, email, password, role });
+        const me = await api.users.me();
+        const user: User = {
+          id: me.id,
+          name: me.name,
+          email: me.email,
+          role: me.role as "candidate" | "employer",
+          avatar: me.avatar ?? undefined,
+          createdAt: me.createdAt,
+        };
+        set({ currentUser: user, isAuthenticated: true, token: res.access_token });
+      },
+
+      logout: () => set({ currentUser: null, isAuthenticated: false, token: null }),
 
       // Jobs
       jobs: mockJobs,
@@ -109,6 +145,12 @@ export const useAppStore = create<AppState>()(
             j.id === jobId ? { ...j, applications: j.applications + 1 } : j
           ),
         });
+      },
+
+      applyToJobApi: async (jobId, coverLetter) => {
+        const newApp = await api.applications.apply(jobId, coverLetter);
+        const { applications } = get();
+        set({ applications: [...applications, newApp] });
       },
 
       // Conversations
@@ -164,12 +206,13 @@ export const useAppStore = create<AppState>()(
       setSearchQuery: (q) => set({ searchQuery: q }),
     }),
     {
-      name: "ubajob-store",
+      name: "ubajob-storage",
       partialize: (s) => ({
         currentUser: s.currentUser,
         isAuthenticated: s.isAuthenticated,
         savedJobs: s.savedJobs,
         theme: s.theme,
+        token: s.token,
       }),
     }
   )

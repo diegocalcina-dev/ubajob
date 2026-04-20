@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAppStore();
+  const { login, loginWithApi } = useAppStore();
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,12 +23,15 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    // Demo: email com "empresa" → employer, senão candidate
-    const role = form.email.includes("empresa") || form.email.includes("pousada") ? "employer" : "candidate";
-    login(form.email, role);
-    setLoading(false);
-    router.push(role === "candidate" ? "/vagas" : "/dashboard/empregador");
+    try {
+      await loginWithApi(form.email, form.password);
+      const { currentUser } = useAppStore.getState();
+      router.push(currentUser?.role === "employer" ? "/dashboard/empregador" : "/vagas");
+    } catch (err: any) {
+      setError(err.message ?? "Credenciais inválidas.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function quickLogin(role: "candidate" | "employer") {

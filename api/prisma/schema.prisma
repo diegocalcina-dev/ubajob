@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  candidateProfile CandidateProfile?
+  employerProfile  EmployerProfile?
+  jobs             Job[]
+  applications     Application[]
+  sentMessages     Message[]         @relation("SentMessages")
+  receivedMessages Message[]         @relation("ReceivedMessages")
+  notifications    Notification[]
+}
+
+model CandidateProfile {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                 String?
+  city                String?
+  state               String?
+  availability        String  @default("Imediata")
+  salaryMin           Int?
+  salaryMax           Int?
+  salaryVisible       Boolean @default(false)
+  profileCompleteness Int     @default(0)
+
+  desiredContracts CandidateContract[]
+  experiences      Experience[]
+  education        Education[]
+  skills           CandidateSkill[]
+  languages        CandidateLanguage[]
+}
+
+model CandidateContract {
+  id        String           @id @default(cuid())
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  contract  String
+}
+
+model Experience {
+  id          String           @id @default(cuid())
+  profileId   String
+  profile     CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  role        String
+  company     String
+  startDate   String
+  endDate     String?
+  current     Boolean          @default(false)
+  description String?
+}
+
+model Education {
+  id          String           @id @default(cuid())
+  profileId   String
+  profile     CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  course      String
+  institution String
+  level       String
+  startDate   String
+  endDate     String?
+  current     Boolean          @default(false)
+}
+
+model CandidateSkill {
+  id        String           @id @default(cuid())
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name      String
+  level     String           @default("Basico")
+  validated Boolean          @default(false)
+}
+
+model CandidateLanguage {
+  id        String           @id @default(cuid())
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name      String
+  level     String
+}
+
+model EmployerProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logo        String?
+  description String?
+  sector      String?
+  city        String?
+  state       String?
+  website     String?
+  teamSize    String?
+}
+
+model Job {
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  employerId    String
+  employer      User      @relation(fields: [employerId], references: [id])
+  category      String
+  contractType  String
+  regime        String
+  location      String
+  salaryMin     Int
+  salaryMax     Int
+  salaryPeriod  String    @default("mes")
+  seasonal      Boolean   @default(false)
+  seasonalStart String?
+  seasonalEnd   String?
+  active        Boolean   @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  benefits     JobBenefit[]
+  requirements JobRequirement[]
+  questions    JobQuestion[]
+  tags         JobTag[]
+  applications Application[]
+}
+
+model JobBenefit {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  value String
+}
+
+model JobRequirement {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  value String
+}
+
+model JobQuestion {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  value String
+}
+
+model JobTag {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  value String
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id])
+  candidateId String
+  candidate   User     @relation(fields: [candidateId], references: [id])
+  status      String   @default("Aplicada")
+  coverLetter String?
+  matchScore  Int?
+  appliedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  body       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

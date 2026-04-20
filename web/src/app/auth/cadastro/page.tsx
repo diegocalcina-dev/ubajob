@@ -12,21 +12,27 @@ import { Suspense } from "react";
 function CadastroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAppStore();
+  const { registerWithApi } = useAppStore();
   const defaultRole = searchParams.get("role") === "employer" ? "employer" : "candidate";
 
   const [role, setRole] = useState<"candidate" | "employer">(defaultRole);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    login(form.email, role);
-    setLoading(false);
-    router.push("/auth/onboarding");
+    try {
+      await registerWithApi(form.name, form.email, form.password, role);
+      router.push("/auth/onboarding");
+    } catch (err: any) {
+      setError(err.message ?? "Erro ao criar conta.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -111,6 +117,8 @@ function CadastroForm() {
               <Link href="#" className="text-primary hover:underline">Termos de Uso</Link> e a{" "}
               <Link href="#" className="text-primary hover:underline">Política de Privacidade</Link>.
             </p>
+
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
             <Button type="submit" loading={loading} className="w-full" size="lg">
               Criar conta grátis
